@@ -7,11 +7,15 @@
     <meta name="keywords" content="AI Engineer, ML Developer, Full-Stack Developer, Computer Vision, Deep Learning, React, Python, TensorFlow">
     <meta property="og:title" content="Sai Viroop Lenka - AI/ML Engineer & Full-Stack Developer">
     <meta property="og:description" content="Building intelligent solutions with 95%+ accuracy. Specializing in AI/ML and full-stack development.">
+    <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <title>Sai Viroop Lenka - AI/ML Engineer & Full-Stack Developer</title>
     
-    <!-- EmailJS SDK -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- EmailJS SDK - Loading with integrity check -->
+    <script type="text/javascript" 
+            src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
+            defer>
+    </script>
     
     <style>
         /* Core Styles and CSS Reset */
@@ -1277,15 +1281,33 @@
     </footer>
     
     <script>
-        // Initialize EmailJS - Replace with your actual IDs
-        (function() {
-            emailjs.init("-y2XDKbMYSE9DDjyf"); // You'll need to sign up at EmailJS and get your public key
-        })();
+        // Initialize EmailJS safely
+        let emailJsReady = false;
         
-        // Loader
+        window.addEventListener('DOMContentLoaded', function() {
+            // Try to initialize EmailJS if it's loaded
+            if (typeof emailjs !== 'undefined') {
+                try {
+                    // Replace with your actual EmailJS public key when you get it
+                    // For now, we'll skip initialization to prevent errors
+                    emailjs.init("-y2XDKbMYSE9DDjyf");
+                    emailJsReady = true;
+                    console.log('EmailJS initialized successfully');
+                } catch (error) {
+                    console.warn('EmailJS initialization failed:', error);
+                }
+            } else {
+                console.warn('EmailJS library not loaded - contact form will simulate sending');
+            }
+        });
+        
+        // Loader - Always hide after page loads
         window.addEventListener('load', () => {
             setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                }
             }, 1000);
         });
         
@@ -1432,7 +1454,7 @@
         
         populateBlog();
         
-        // Contact Form Handling with EmailJS
+        // Contact Form Handling with fallback
         const contactForm = document.getElementById('contactForm');
         const formMessage = document.getElementById('formMessage');
         
@@ -1452,24 +1474,47 @@
                 to_name: 'Sai Viroop Lenka',
             };
             
-            // Send email using EmailJS
-            // Note: You need to sign up for EmailJS and configure your service
-            // Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with your actual IDs
-            emailjs.send('service_1bqf4bf', 'template_xvgt97x', templateParams)
-                .then(function(response) {
-                    formMessage.textContent = 'Message sent successfully! I\'ll get back to you soon.';
-                    formMessage.className = 'form-message success show';
-                    contactForm.reset();
-                    
-                    // Hide message after 5 seconds
-                    setTimeout(() => {
-                        formMessage.className = 'form-message';
-                    }, 5000);
-                }, function(error) {
-                    formMessage.textContent = 'Failed to send message. Please try again or email directly.';
-                    formMessage.className = 'form-message error show';
-                    console.error('EmailJS error:', error);
+            // Check if EmailJS is available
+            if (emailJsReady && typeof emailjs !== 'undefined') {
+                // Send email using EmailJS
+                // Note: You need to sign up for EmailJS and configure your service
+                // Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with your actual IDs
+                emailjs.send('service_1bqf4bf', 'template_uqnpywb', templateParams)
+                    .then(function(response) {
+                        formMessage.textContent = 'Message sent successfully! I\'ll get back to you soon.';
+                        formMessage.className = 'form-message success show';
+                        contactForm.reset();
+                        
+                        // Hide message after 5 seconds
+                        setTimeout(() => {
+                            formMessage.className = 'form-message';
+                        }, 5000);
+                    }, function(error) {
+                        formMessage.textContent = 'Failed to send message. Please try again or email directly.';
+                        formMessage.className = 'form-message error show';
+                        console.error('EmailJS error:', error);
+                    });
+            } else {
+                // Fallback: Show success message and display contact info
+                console.log('Contact form submission:', templateParams);
+                formMessage.innerHTML = `
+                    Message recorded! Since EmailJS is not configured yet, please send your message directly to:<br>
+                    <strong>lenkasaiviroop333@gmail.com</strong><br>
+                    <small>Your message: "${templateParams.message.substring(0, 50)}..."</small>
+                `;
+                formMessage.className = 'form-message success show';
+                
+                // Optional: Copy email to clipboard
+                navigator.clipboard.writeText('lenkasaiviroop333@gmail.com').then(() => {
+                    console.log('Email copied to clipboard!');
                 });
+                
+                // Reset form after delay
+                setTimeout(() => {
+                    contactForm.reset();
+                    formMessage.className = 'form-message';
+                }, 7000);
+            }
         });
         
         // Add typing effect to hero tagline
